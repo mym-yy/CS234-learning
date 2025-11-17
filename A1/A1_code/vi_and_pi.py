@@ -171,13 +171,13 @@ def value_iteration(R, T, gamma, tol=1e-3):
         if max_delta < tol:
             break
 
-        for s in range(num_states):
-            q_values = np.zeros(num_actions)
+    for s in range(num_states):
+        q_values = np.zeros(num_actions)
 
-            for a in range(num_actions):
-                q_values[a] = bellman_backup(s, a, R, T, gamma, value_function)
+        for a in range(num_actions):
+            q_values[a] = bellman_backup(s, a, R, T, gamma, value_function)
 
-            policy[s] = np.argmax(q_values)
+        policy[s] = np.argmax(q_values)
     ############################
     return value_function, policy
 
