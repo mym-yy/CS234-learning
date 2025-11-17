@@ -157,10 +157,12 @@ def value_iteration(R, T, gamma, tol=1e-3):
         V_old = value_function.copy()
         max_delta = 0
 
+        #找到每个状态的最优值函数才能完成迭代
         for s in range(num_states):
             q_values = np.zeros(num_actions)
 
             for a in range(num_actions):
+                #计算每个动作的Q值
                 q_values[a] = bellman_backup(s, a, R, T, gamma, value_function)
 
             V_new_s = np.max(q_values)
@@ -171,6 +173,8 @@ def value_iteration(R, T, gamma, tol=1e-3):
         if max_delta < tol:
             break
 
+    #根据最终的值函数提取策略
+    #最终的策略是每个状态下选择使得Q值最大的动作
     for s in range(num_states):
         q_values = np.zeros(num_actions)
 
