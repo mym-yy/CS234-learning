@@ -25,7 +25,12 @@ def bellman_backup(state, action, R, T, gamma, V):
     backup_val = 0.
     ############################
     # YOUR IMPLEMENTATION HERE #
-
+    num_states, num_actions = R.shape
+    backup_val = R[state, action]
+    expected_val = 0.
+    for i in range(num_states):
+        expected_val += T[state, action, i] * V[i]
+    backup_val += gamma * expected_val
     ############################
 
     return backup_val
@@ -50,10 +55,21 @@ def policy_evaluation(policy, R, T, gamma, tol=1e-3):
 
     ############################
     # YOUR IMPLEMENTATION HERE #
+    while True:
+        V_old = value_function.copy()
+        max_delta = 0
 
+        for s in range(num_states):
+            a = policy[s]
+            V_new_s = bellman_backup(s, a, R, T, gamma, value_function)
+            delta = np.abs(V_new_s - V_old[s])
+            value_function[s] = V_new_s
+            max_delta = max(delta, max_delta)
+
+        if max_delta < tol:
+            break
     ############################
     return value_function
-
 
 def policy_improvement(policy, R, T, V_policy, gamma):
     """
@@ -63,7 +79,7 @@ def policy_improvement(policy, R, T, V_policy, gamma):
     policy: np.array (num_states)
     R: np.array (num_states, num_actions)
     T: np.array (num_states, num_actions, num_states)
-    V_policy: np.array (num_states)
+    V_policy: np.array (num_states),policy下的状态价值函数
     gamma: float
 
     Returns
@@ -75,7 +91,13 @@ def policy_improvement(policy, R, T, V_policy, gamma):
 
     ############################
     # YOUR IMPLEMENTATION HERE #
+    for s in range(num_states):
+        q_values = np.zeros(num_actions)
 
+        for a in range(num_actions):
+            q_values[a] = bellman_backup(s, a, R, T, gamma, V_policy)
+
+        new_policy[s] = np.argmax(q_values)
     ############################
     return new_policy
 
@@ -100,7 +122,16 @@ def policy_iteration(R, T, gamma, tol=1e-3):
     policy = np.zeros(num_states, dtype=int)
     ############################
     # YOUR IMPLEMENTATION HERE #
+    while True:
+        #策略评估
+        V_policy = policy_evaluation(policy, R, T, gamma, tol)
+        #策略改进
+        new_policy = policy_improvement(policy, R, T, V_policy, gamma)
 
+        if np.all(new_policy == policy):
+            break
+
+        policy = new_policy.copy()
     ############################
     return V_policy, policy
 
@@ -122,7 +153,31 @@ def value_iteration(R, T, gamma, tol=1e-3):
     policy = np.zeros(num_states, dtype=int)
     ############################
     # YOUR IMPLEMENTATION HERE #
+    while True:
+        V_old = value_function.copy()
+        max_delta = 0
 
+        for s in range(num_states):
+            q_values = np.zeros(num_actions)
+
+            for a in range(num_actions):
+                q_values[a] = bellman_backup(s, a, R, T, gamma, value_function)
+
+            V_new_s = np.max(q_values)
+            delta = np.abs(V_new_s - V_old[s])
+            value_function[s] = V_new_s
+            max_delta = max(delta, max_delta)
+
+        if max_delta < tol:
+            break
+
+        for s in range(num_states):
+            q_values = np.zeros(num_actions)
+
+            for a in range(num_actions):
+                q_values[a] = bellman_backup(s, a, R, T, gamma, value_function)
+
+            policy[s] = np.argmax(q_values)
     ############################
     return value_function, policy
 
